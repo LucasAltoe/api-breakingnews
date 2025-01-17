@@ -1,0 +1,15 @@
+{
+  "name": "projeto-de-mern-stack",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index"
+  },
+  "keywords": [],
+  "author": "Lucas Altoé",
+  "license": "ISC",
+  "description": "API for SPA Breaking News",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
