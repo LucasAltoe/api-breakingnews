@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "API for SPA Breaking News",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "express": "^4.21.2",
     "mongodb": "^6.12.0",
     "mongoose": "^8.9.5"
