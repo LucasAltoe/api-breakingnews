@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { loginService } from '../services/auth.service.js';
+import { loginService, generateToken } from '../services/auth.service.js';
 
 export const login = async (req, res) => {
     const { email, password } = req.body //formulário a ser preenchido sempre é recebido por body
@@ -17,7 +17,9 @@ export const login = async (req, res) => {
             res.status(404).send({ message: 'User or Password Not Found!' });
         }
 
-        res.send('Login Ok');
+        const token = generateToken(user.id);
+
+        res.send({token});
     } catch (err) {
         res.status(500).send({ message: err.message });
     }
