@@ -5,4 +5,6 @@ import { create, findAll } from '../controllers/news.controller.js';
 
 router.post("/", create);
 
-router.get("/", findAll)
+router.get("/", findAll);
+
+export default router;

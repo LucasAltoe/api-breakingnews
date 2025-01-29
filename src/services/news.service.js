@@ -4,7 +4,7 @@ const createService = (body) => News.create(body);
 
 const findAllService = () => News.find();
 
-export default {
+export { //Com export default nos nao conseguimos mandar desconstruido
     createService,
     findAllService
 }

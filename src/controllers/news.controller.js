@@ -12,20 +12,21 @@ const create = async (req, res) => {
             title,
             text,
             banner,
-            id: "objectidfake1"
-        })
+            user: { _id: "6798f822b25b15e8ba74abf9" }
+        });
 
+        res.status(201).send({ message: 'News created successfully' });
     } catch (err) {
         res.status(500).send({ message: err.message });
     }
-
-
-    res.status(201);
 };
 
-const findAll = () => {
-    const news = [];
-    res.send(news)
-};
+const findAll = async (req, res) => {
+    const news = await findAllService();
+    if (news.length === 0) {
+        return res.status(400).send({ message: "There are no registered news" });
+    }
+    res.send(news);
+}
 
-export default { create, findAll };
+export { create, findAll };
