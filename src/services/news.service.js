@@ -10,9 +10,12 @@ const countNews = () => News.countDocuments();
 
 const topNewsService = () => News.findOne().sort({ _id: -1 }).populate("user");
 
+const findByIdService = (id) => News.findById(id).populate("user"); 
+
 export { //Com export default nos nao conseguimos mandar desconstruido
     createService,
     findAllService,
     countNews,
-    topNewsService
+    topNewsService, 
+    findByIdService
 }
