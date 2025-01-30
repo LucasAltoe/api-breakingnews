@@ -8,8 +8,11 @@ const findAllService = (offset, limit) => News.find().sort({ _id: -1 }).skip(off
 
 const countNews = () => News.countDocuments();
 
+const topNewsService = () => News.findOne().sort({ _id: -1 }).populate("user");
+
 export { //Com export default nos nao conseguimos mandar desconstruido
     createService,
     findAllService,
-    countNews
+    countNews,
+    topNewsService
 }
