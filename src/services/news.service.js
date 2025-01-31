@@ -16,7 +16,9 @@ const searchByTitleService = (title) => News.find({
     title: { $regex: `${title || ""}`, $options: "i" } //case insensitive
 }).sort({ _id: -1 }).populate("user"); //Nessa regex o usuário pode mandar o titulo completo ou parte dele
 
-const byUserService = (id) => News.find({user: id}).sort({ _id: -1 }).populate("user"); //No esquema de news, user é um id
+const byUserService = (id) => News.find({ user: id }).sort({ _id: -1 }).populate("user"); //No esquema de news, user é um id
+
+const updateService = (id, title, text, banner) => News.findByIdAndUpdate({ _id: id }, { title, text, banner }, {rawResult: true});
 
 export { //Com export default nos nao conseguimos mandar desconstruido
     createService,
@@ -25,5 +27,6 @@ export { //Com export default nos nao conseguimos mandar desconstruido
     topNewsService,
     findByIdService,
     searchByTitleService,
-    byUserService
+    byUserService,
+    updateService
 }

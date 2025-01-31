@@ -1,4 +1,4 @@
-import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService } from '../services/news.service.js';
+import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService } from '../services/news.service.js';
 
 const create = async (req, res) => {
     try {
@@ -124,7 +124,7 @@ const findById = async (req, res) => {
     } catch (err) {
         res.status(500).send({ message: err.message });
     }
-}
+};
 
 const searchTitle = async (req, res) => {
     try {
@@ -154,32 +154,67 @@ const searchTitle = async (req, res) => {
     } catch (err) {
         res.status(500).send({ message: err.message });
     }
-}
+};
 
 const byUser = async (req, res) => {
     try {
-       const id = req.userId //Essa é uma variável já existente no middleware, e na rota nós passamos que ela tem que passar por esse middleware, por isso conseguimos ter acesso a ela
+        const id = req.userId //Essa é uma variável já existente no middleware, e na rota nós passamos que ela tem que passar por esse middleware, por isso conseguimos ter acesso a ela
 
-       const news = await byUserService(id);
+        const news = await byUserService(id);
 
-       res.send({ //Como news são várias notícias ele nos retorna elas num array, por isso, usamos um map para obtermos um novo array retornado com nossas especificações
-        results: news.map(item => ({
-            id: item._id,
-            title: item.title,
-            text: item.text,
-            banner: item.banner,
-            likes: item.likes,
-            comments: item.comments,
-            name: item.user.name,
-            userName: item.user.username,
-            userAvatar: item.user.avatar
+        res.send({ //Como news são várias notícias ele nos retorna elas num array, por isso, usamos um map para obtermos um novo array retornado com nossas especificações
+            results: news.map(item => ({
+                id: item._id,
+                title: item.title,
+                text: item.text,
+                banner: item.banner,
+                likes: item.likes,
+                comments: item.comments,
+                name: item.user.name,
+                userName: item.user.username,
+                userAvatar: item.user.avatar
 
-        }))
-    });
+            }))
+        });
 
     } catch (err) {
         res.status(500).send({ message: err.message })
     }
-}
+};
 
-export { create, findAll, topNews, findById, searchTitle, byUser };
+const update = async (req, res) => {
+    try {
+        const { title, text, banner } = req.body;
+        const { id } = req.params;
+
+        // Verifica se pelo menos um campo foi enviado
+        if (!title && !banner && !text) {
+            return res.status(400).send({ message: "Submit at least one field to update the post" });
+        }
+
+        // Busca a notícia pelo ID
+        const news = await findByIdService(id);
+
+        // Verifica se a notícia existe
+        if (!news) {
+            return res.status(404).send({ message: "Post not found" });
+        }
+
+        // Verifica se o usuário tem permissão para atualizar a postagem
+        if (news.user._id.toString() !== req.userId.toString()) {
+            return res.status(403).send({ message: "You are not authorized to update this post" });
+        }
+
+        // Chama o serviço de atualização
+        await updateService(id, title, text, banner);
+
+        // Retorna sucesso
+        return res.send({ message: "Post successfully updated!" });
+
+    } catch (err) {
+        // Trata erros inesperados
+        res.status(500).send({ message: err.message });
+    }
+};
+
+export { create, findAll, topNews, findById, searchTitle, byUser, update };
