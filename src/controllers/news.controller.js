@@ -1,4 +1,6 @@
-import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService } from '../services/news.service.js';
+import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService, eraserService, likeNewsService, DeleteLikeNewsService, addCommentService, deleteCommentService } from '../services/news.service.js';
+
+import News from '../models/News.js'; // Caminho correto para o modelo News
 
 const create = async (req, res) => {
     try {
@@ -189,7 +191,7 @@ const update = async (req, res) => {
 
         // Verifica se pelo menos um campo foi enviado
         if (!title && !banner && !text) {
-            return res.status(400).send({ message: "Submit at least one field to update the post" });
+            return res.status(400).send({ message: "Submit at least one field to update the news" });
         }
 
         // Busca a notícia pelo ID
@@ -197,19 +199,19 @@ const update = async (req, res) => {
 
         // Verifica se a notícia existe
         if (!news) {
-            return res.status(404).send({ message: "Post not found" });
+            return res.status(404).send({ message: "News not found" });
         }
 
         // Verifica se o usuário tem permissão para atualizar a postagem
         if (news.user._id.toString() !== req.userId.toString()) {
-            return res.status(403).send({ message: "You are not authorized to update this post" });
+            return res.status(403).send({ message: "You are not authorized to update this news" });
         }
 
         // Chama o serviço de atualização
         await updateService(id, title, text, banner);
 
         // Retorna sucesso
-        return res.send({ message: "Post successfully updated!" });
+        return res.send({ message: "News successfully updated!" });
 
     } catch (err) {
         // Trata erros inesperados
@@ -217,4 +219,93 @@ const update = async (req, res) => {
     }
 };
 
-export { create, findAll, topNews, findById, searchTitle, byUser, update };
+const erase = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const news = await findByIdService(id);
+
+        if (news.user._id.toString() !== req.userId.toString()) {
+            return res.status(403).send({ message: "You are not authorized to delete this news" });
+        }
+
+        await eraserService(id);
+
+        return res.send({ message: "News deleted successfully!" })
+
+    } catch (err) {
+        res.status(500).send({ message: err.message });
+    }
+};
+
+const likeNews = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.userId;
+
+        const newsLiked = await likeNewsService(id, userId);
+
+        if (newsLiked === null) {
+            await DeleteLikeNewsService(id, userId);
+            return res.status(200).send({ message: "Like successfully removed" });
+        }
+
+        res.send({ message: "Like done successfully" });
+
+    } catch (err) {
+        res.status(500).send({ message: err.message });
+    }
+};
+
+const addComment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.userId;
+        const { comment } = req.body;
+
+        if (!comment) {
+            return res.status(400).send({ message: "Write a message to comment" });
+        }
+
+        await addCommentService(id, comment, userId);
+
+        res.send({ message: "Comment successfully completed!" });
+
+    } catch (err) {
+        res.status(500).send({ message: err.message });
+    }
+};
+
+const deleteComment = async (req, res) => {
+    try {
+        const { idNews, idComment } = req.params;
+        const userId = req.userId;
+
+        // Primeiro, encontre a notícia e o comentário específico
+        const news = await News.findOne(
+            { _id: idNews, "comments.idComment": idComment },
+            { "comments.$": 1 } // Retorna apenas o comentário específico
+        );
+
+        // Verifique se a notícia e o comentário existem
+        if (!news || !news.comments || news.comments.length === 0) {
+            return res.status(404).send({ message: "Comment not found" });
+        }
+
+        // Verifique se o comentário pertence ao usuário
+        const commentFinder = news.comments[0];
+        if (commentFinder.userId.toString() !== userId.toString()) {
+            return res.status(403).send({ message: "You can't delete this comment" });
+        }
+
+        // Se tudo estiver correto, delete o comentário
+        const commentDeleted = await deleteCommentService(idNews, idComment, userId);
+
+        res.send({ message: "Comment deleted successfully!" });
+
+    } catch (err) {
+        res.status(500).send({ message: err.message });
+    }
+};
+
+export { create, findAll, topNews, findById, searchTitle, byUser, update, erase, likeNews, addComment, deleteComment };
