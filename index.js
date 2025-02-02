@@ -29,3 +29,4 @@ app.listen(PORT, () => {
 }) 
 
 // Acessar o mongodb atlas para o banco de dados
+//https://api-breakingnews-3l4d.onrender.com
